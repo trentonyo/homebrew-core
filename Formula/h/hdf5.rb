@@ -1,10 +1,10 @@
 class Hdf5 < Formula
   desc "File format designed to store large amounts of data"
-  homepage "https://www.hdfgroup.org/HDF5"
-  url "https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.3/src/hdf5-1.14.3.tar.bz2"
-  sha256 "9425f224ed75d1280bb46d6f26923dd938f9040e7eaebf57e66ec7357c08f917"
+  homepage "https://www.hdfgroup.org/solutions/hdf5/"
+  url "https://github.com/HDFGroup/hdf5/releases/download/hdf5_1.14.4.3/hdf5-1.14.4-3.tar.gz"
+  version "1.14.4.3"
+  sha256 "019ac451d9e1cf89c0482ba2a06f07a46166caf23f60fea5ef3c37724a318e03"
   license "BSD-3-Clause"
-  revision 1
   version_scheme 1
 
   # This regex isn't matching filenames within href attributes (as we normally
@@ -43,6 +43,10 @@ class Hdf5 < Formula
       -DHDF5_BUILD_CPP_LIB:BOOL=ON
       -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON
     ]
+
+    # https://github.com/HDFGroup/hdf5/issues/4310
+    args << "-DHDF5_ENABLE_NONSTANDARD_FEATURE_FLOAT16:BOOL=OFF"
+
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
 
     # Avoid c shims in settings files
@@ -77,7 +81,7 @@ class Hdf5 < Formula
       }
     EOS
     system bin/"h5cc", "test.c"
-    assert_equal version.to_s, shell_output("./a.out").chomp
+    assert_equal version.major_minor_patch.to_s, shell_output("./a.out").chomp
 
     (testpath/"test.f90").write <<~EOS
       use hdf5
@@ -107,7 +111,7 @@ class Hdf5 < Formula
       end
     EOS
     system bin/"h5fc", "test.f90"
-    assert_equal version.to_s, shell_output("./a.out").chomp
+    assert_equal version.major_minor_patch.to_s, shell_output("./a.out").chomp
 
     # Make sure that it was built with SZIP/libaec
     config = shell_output("#{bin}/h5cc -showconfig")
