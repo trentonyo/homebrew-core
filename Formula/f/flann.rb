@@ -21,6 +21,10 @@ class Flann < Formula
   depends_on "hdf5"
   depends_on "lz4"
 
+  on_macos do
+    depends_on "lz4"
+  end
+
   def install
     system "cmake", "-S", ".", "-B", "build",
                     "-DBUILD_PYTHON_BINDINGS:BOOL=OFF",
