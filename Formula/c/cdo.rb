@@ -4,6 +4,7 @@ class Cdo < Formula
   url "https://code.mpimet.mpg.de/attachments/download/29616/cdo-2.4.3.tar.gz"
   sha256 "4a608b70ee1907b45e149ad44033bb47d35b7da96096553193bd362ca9d445eb"
   license "GPL-2.0-only"
+  revision 1
 
   livecheck do
     url "https://code.mpimet.mpg.de/projects/cdo/files"
