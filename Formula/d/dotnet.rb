@@ -3,8 +3,8 @@ class Dotnet < Formula
   homepage "https://dotnet.microsoft.com/"
   # Source-build tag announced at https://github.com/dotnet/source-build/discussions
   url "https://github.com/dotnet/dotnet.git",
-      tag:      "v8.0.4",
-      revision: "83659133a1aa2b2d94f9c4ecebfa10d960e27706"
+      tag:      "v8.0.8",
+      revision: "e78e8a64f20e61e1fea4f24afca66ad1dc56285f"
   license "MIT"
 
   bottle do
@@ -50,6 +50,7 @@ class Dotnet < Formula
     else
       ENV.append_path "LD_LIBRARY_PATH", Formula["icu4c"].opt_lib
       ENV.append_to_cflags "-I#{Formula["krb5"].opt_include}"
+      ENV.append_to_cflags "-I#{Formula["zlib"].opt_include}"
 
       # Use our libunwind rather than the bundled one.
       inreplace "src/runtime/eng/SourceBuild.props",
