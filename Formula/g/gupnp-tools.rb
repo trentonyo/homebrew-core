@@ -31,7 +31,11 @@ class GupnpTools < Formula
   depends_on "libxml2"
 
   on_macos do
+    depends_on "at-spi2-core"
+    depends_on "cairo"
     depends_on "gettext"
+    depends_on "harfbuzz"
+    depends_on "pango"
   end
 
   # Backport fix for libxml 2.12. Remove in the next release.
