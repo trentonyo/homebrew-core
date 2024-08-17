@@ -23,29 +23,39 @@ class Pidgin < Formula
 
   depends_on "intltool" => :build
   depends_on "pkg-config" => :build
+
+  depends_on "at-spi2-core"
   depends_on "cairo"
+  depends_on "gdk-pixbuf"
   depends_on "gettext"
+  depends_on "glib"
   depends_on "gnutls"
   depends_on "gtk+"
   depends_on "libgcrypt"
   depends_on "libgnt"
   depends_on "libidn"
   depends_on "libotr"
+  depends_on "libxml2" # see discussions in https://issues.imfreedom.org/issue/PIDGIN-17891/incompatible-function-pointer-types-issue
   depends_on "pango"
 
   uses_from_macos "cyrus-sasl"
+  uses_from_macos "expat"
   uses_from_macos "ncurses"
   uses_from_macos "perl"
   uses_from_macos "tcl-tk"
 
-  on_linux do
-    depends_on "libsm"
-    depends_on "libxscrnsaver"
+  on_macos do
+    depends_on "harfbuzz"
+    depends_on "libgpg-error"
+  end
 
-    resource "XML::Parser" do
-      url "https://cpan.metacpan.org/authors/id/T/TO/TODDR/XML-Parser-2.46.tar.gz"
-      sha256 "d331332491c51cccfb4cb94ffc44f9cd73378e618498d4a37df9e043661c515d"
-    end
+  on_linux do
+    depends_on "perl-xml-parser" => :build
+
+    depends_on "libice"
+    depends_on "libsm"
+    depends_on "libx11"
+    depends_on "libxscrnsaver"
   end
 
   # Finch has an equal port called purple-otr but it is a NIGHTMARE to compile
@@ -56,19 +66,7 @@ class Pidgin < Formula
   end
 
   def install
-    unless OS.mac?
-      ENV.prepend_path "PERL5LIB", Formula["intltool"].libexec/"lib/perl5"
-      ENV.prepend_create_path "PERL5LIB", libexec/"lib/perl5"
-
-      perl_resources = %w[XML::Parser]
-      perl_resources.each do |r|
-        resource(r).stage do
-          system "perl", "Makefile.PL", "INSTALL_BASE=#{libexec}"
-          system "make"
-          system "make", "install"
-        end
-      end
-    end
+    ENV.prepend_path "PERL5LIB", Formula["perl-xml-parser"].opt_libexec/"lib/perl5" unless OS.mac?
 
     args = %W[
       --disable-debug
