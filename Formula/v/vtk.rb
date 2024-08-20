@@ -4,7 +4,7 @@ class Vtk < Formula
   url "https://www.vtk.org/files/release/9.3/VTK-9.3.1.tar.gz"
   sha256 "8354ec084ea0d2dc3d23dbe4243823c4bfc270382d0ce8d658939fd50061cab8"
   license "BSD-3-Clause"
-  revision 1
+  revision 2
   head "https://gitlab.kitware.com/vtk/vtk.git", branch: "master"
 
   bottle do
@@ -117,6 +117,10 @@ class Vtk < Formula
 
     # https://github.com/Homebrew/linuxbrew-core/pull/21654#issuecomment-738549701
     args << "-DOpenGL_GL_PREFERENCE=LEGACY"
+
+    # Help vtk find hdf5 1.14.4.x
+    # https://github.com/Homebrew/homebrew-core/pull/170959#issuecomment-2295288143
+    args << "-DHDF5_INCLUDE_DIR=#{Formula["hdf5"].opt_include}"
 
     args << "-DVTK_USE_COCOA:BOOL=ON" if OS.mac?
 
