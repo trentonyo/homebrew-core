@@ -6,6 +6,7 @@
   "libcaca": "0.99b",
   "librasterlite2": "1.1.0-beta",
   "postgresql@17": "17beta",
+  "postgis-pg17": "3.5.0alpha",
   "premake": "5.0.0-beta",
   "pwnat": "0.3-beta",
   "recode": "3.7-beta",
