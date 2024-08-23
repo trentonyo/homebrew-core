@@ -4,12 +4,10 @@ class Agda < Formula
   # agda2hs.cabal specifies BSD-3-Clause but it installs an MIT LICENSE file.
   # Everything else specifies MIT license and installs corresponding file.
   license all_of: ["MIT", "BSD-3-Clause"]
-  revision 2
 
   stable do
-    url "https://github.com/agda/agda/archive/refs/tags/v2.6.4.3-r1.tar.gz"
-    sha256 "15a0ebf08b71ebda0510c8cad04b053beeec653ed26e2c537614a80de8b2e132"
-    version "2.6.4.3"
+    url "https://github.com/agda/agda/archive/refs/tags/v2.7.0.tar.gz"
+    sha256 "1d2832b00afdf6d3d97b8d58bbc098d78f7a4efb8dc820d35e8b8fbefd5bb4d1"
 
     resource "stdlib" do
       url "https://github.com/agda/agda-stdlib/archive/refs/tags/v2.1.tar.gz"
@@ -29,6 +27,10 @@ class Agda < Formula
     resource "agda2hs" do
       url "https://github.com/agda/agda2hs/archive/refs/tags/v1.2.tar.gz"
       sha256 "e80ffc90ff2ccb3933bf89a39ab16d920a6c7a7461a6d182faa0fb6c0446dbb8"
+
+      # Work around to build agda2hs with GHC 9.10
+      # Issue ref: https://github.com/agda/agda2hs/issues/347
+      patch :DATA
     end
   end
 
@@ -94,20 +96,6 @@ class Agda < Formula
     # relying on the Agda library just installed
     resource("agda2hs").stage "agda2hs-build"
     cd "agda2hs-build" do
-      # Use previously built Agda binary to work around build error with Cabal 3.12
-      # Issue ref: https://github.com/agda/agda/issues/7401
-      # TODO: Try removing workaround when Agda 2.7.0 is released
-      if build.stable?
-        odie "Try to remove Setup.hs workaround!" if version > "2.6.4.3"
-        Pathname("cabal.project.local").write "packages: ./agda2hs.cabal ../Agda.cabal"
-        inreplace buildpath/"Setup.hs", ' agda = bdir </> "agda" </> "agda" <.> agdaExeExtension',
-                                        " agda = \"#{bin}/agda\" <.> agdaExeExtension"
-      end
-
-      # Work around to build agda2hs with GHC 9.10
-      # Issue ref: https://github.com/agda/agda2hs/issues/347
-      inreplace "agda2hs.cabal", /( base .*&&) < 4\.20,/, "\\1 < 4.21,", build.stable?
-
       system "cabal", "--store-dir=#{libexec}", "v2-install", *std_cabal_v2_args
     end
 
@@ -317,3 +305,56 @@ class Agda < Formula
     assert_equal agda2hsexpect, agda2hsactual
   end
 end
+
+__END__
+diff --git a/agda2hs.cabal b/agda2hs.cabal
+index 603f56e..537ec98 100644
+--- a/agda2hs.cabal
++++ b/agda2hs.cabal
+@@ -46,8 +46,8 @@ executable agda2hs
+                        AgdaInternals,
+                        Paths_agda2hs
+   autogen-modules:     Paths_agda2hs
+-  build-depends:       base >= 4.10 && < 4.20,
+-                       Agda >= 2.6.4 && < 2.6.5,
++  build-depends:       base >= 4.10 && < 4.21,
++                       Agda >= 2.6.4 && < 2.7.1,
+                        bytestring >= 0.11.5 && < 0.13,
+                        containers >= 0.6 && < 0.8,
+                        unordered-containers >= 0.2.19 && < 0.3,
+diff --git a/src/Agda2Hs/Compile/Name.hs b/src/Agda2Hs/Compile/Name.hs
+index b9841e3..01c91fd 100644
+--- a/src/Agda2Hs/Compile/Name.hs
++++ b/src/Agda2Hs/Compile/Name.hs
+@@ -94,7 +94,7 @@ compileQName f
+     return c
+   | otherwise = do
+     f <- isRecordConstructor f >>= return . \case
+-      Just (r, Record{recNamedCon = False}) -> r -- use record name for unnamed constructors
++      Just (r, RecordData{recNamedCon = False}) -> r -- use record name for unnamed constructors
+       _                                     -> f
+     hf0 <- compileName (qnameName f)
+     (hf, mimpBuiltin) <- fromMaybe (hf0, Nothing) <$> isSpecialName f
+@@ -192,7 +192,7 @@ hsTopLevelModuleName :: TopLevelModuleName -> Hs.ModuleName ()
+ hsTopLevelModuleName = hsModuleName . intercalate "." . map unpack
+                      . List1.toList . moduleNameParts
+
+--- | Given a module name (assumed to be a toplevel module),
++-- | Given a module name (assumed to be a toplevel module),
+ -- compute the associated Haskell module name.
+ compileModuleName :: ModuleName -> C (Hs.ModuleName ())
+ compileModuleName m = do
+diff --git a/src/Agda2Hs/Compile/Utils.hs b/src/Agda2Hs/Compile/Utils.hs
+index 349ea77..75bbad6 100644
+--- a/src/Agda2Hs/Compile/Utils.hs
++++ b/src/Agda2Hs/Compile/Utils.hs
+@@ -69,7 +69,8 @@ freshString :: String -> C String
+ freshString s = liftTCM $ do
+   scope <- getScope
+   ctxNames <- map (prettyShow . nameConcrete) <$> getContextNames
+-  return $ head $ filter (isFresh scope ctxNames) $ s : map (\i -> s ++ show i) [0..]
++  return $ fromMaybe defaultValue $ listToMaybe $ filter (isFresh scope ctxNames) $ s : map (\i -> s ++ show i) [0..]
++    where defaultValue = s -- or some other appropriate default value
+   where
+     dummyName s = C.QName $ C.Name noRange C.NotInScope $ singleton $ C.Id s
+     isFresh scope ctxNames s =
