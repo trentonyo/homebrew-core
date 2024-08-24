@@ -17,9 +17,17 @@ class Purr < Formula
   end
 
   depends_on "fzf"
+
+  on_macos do
+    depends_on "gnu-sed" => :build
+  end
+
   uses_from_macos "zsh"
 
   def install
+    # For `sed -i` usage used to remove comments
+    ENV.prepend_path "PATH", Formula["gnu-sed"].libexec/"gnubin" if OS.mac?
+
     system "make"
     bin.install "out/purr"
 
