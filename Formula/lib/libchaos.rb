@@ -21,16 +21,31 @@ class Libchaos < Formula
 
   depends_on "cmake" => :build
 
+  on_ventura :or_newer do
+    depends_on "gcc"
+
+    fails_with :clang do
+      cause <<~EOS
+        /Library/Developer/CommandLineTools/SDKs/MacOSX14.sdk/usr/include/c++/v1/__random/normal_distribution.h:136:5:
+        error: static assertion failed due to requirement
+        '__libcpp_random_is_valid_urng<chaos::basic_adapter, void>::value'
+      EOS
+    end
+  end
+
   def install
-    system "cmake", "-S", ".", "-B", "build", "-DLIBCHAOS_ENABLE_TESTING=OFF",
-           "-DBUILD_SHARED_LIBS=ON", *std_cmake_args
+    args = %w[
+      -DLIBCHAOS_ENABLE_TESTING=OFF
+      -DSKIP_CCACHE=ON
+    ]
+
+    system "cmake", "-S", ".", "-B", "build", "-DBUILD_SHARED_LIBS=ON", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
 
-    system "cmake", "-S", ".", "-B", "build", "-DLIBCHAOS_ENABLE_TESTING=OFF",
-           "-DBUILD_SHARED_LIBS=OFF", *std_cmake_args
+    system "cmake", "-S", ".", "-B", "build", "-DBUILD_SHARED_LIBS=OFF", *args, *std_cmake_args
     system "cmake", "--build", "build"
-    lib.install buildpath/"build/libchaos.a"
+    lib.install "build/libchaos.a"
   end
 
   test do
