@@ -3,7 +3,7 @@ class Libbpg < Formula
   homepage "https://bellard.org/bpg/"
   url "https://bellard.org/bpg/libbpg-0.9.8.tar.gz"
   sha256 "c0788e23bdf1a7d36cb4424ccb2fae4c7789ac94949563c4ad0e2569d3bf0095"
-  license all_of: ["MIT", "BSD-3-Clause", "LGPL-2.1-or-later", "GPL-2.0-or-later"]
+  license all_of: ["MIT", "BSD-3-Clause", "LGPL-2.1-or-later"]
   revision 1
 
   bottle do
@@ -19,16 +19,18 @@ class Libbpg < Formula
   # Test fails, email sent to upstream on Aug 2023, no response
   deprecate! date: "2023-09-26", because: :unmaintained
 
-  depends_on "cmake" => :build
-  depends_on "yasm" => :build
   depends_on "jpeg-turbo"
   depends_on "libpng"
+  depends_on "x265"
 
   def install
     # Work around "-Werror,-Wimplicit-function-declaration" on Xcode 14
     # The Makefile does not allow modifying CFLAGS with an env variable, so we
     # have to inject the flag manually
     inreplace "Makefile", "CFLAGS+=-g", "CFLAGS+=-g -Wno-implicit-function-declaration"
+    # Remove the bundled x265
+    inreplace "Makefile", " $(X265_LIBS)", " #{Formula["x265"].opt_lib/shared_library("libx265")}"
+    rm_r "x265"
 
     bin.mkpath
     extra_args = []
