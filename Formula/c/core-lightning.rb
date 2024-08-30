@@ -1,8 +1,8 @@
 class CoreLightning < Formula
   desc "Lightning Network implementation focusing on spec compliance and performance"
   homepage "https://github.com/ElementsProject/lightning"
-  url "https://github.com/ElementsProject/lightning/releases/download/v24.05/clightning-v24.05.zip"
-  sha256 "143ec914cf34c2baeea815a3627247661d9fd86649e970d09944345deb675818"
+  url "https://github.com/ElementsProject/lightning/releases/download/v24.08/clightning-v24.08.zip"
+  sha256 "bb876455c75db9306e444eb5e663f1eba53c38565278c74bd9f3493681db5717"
   license "MIT"
 
   livecheck do
@@ -49,7 +49,7 @@ class CoreLightning < Formula
     cmd = "#{bin}/lightningd --daemon --network regtest --log-file lightningd.log"
     if OS.mac? && Hardware::CPU.arm?
       lightningd_output = shell_output("#{cmd} 2>&1", 10)
-      assert_match "lightningd: Could not run /lightning_channeld: No such file or directory", lightningd_output
+      assert_match "lightningd: Could not run #{bin}/lightning_channeld: No such file or directory", lightningd_output
     else
       lightningd_output = shell_output("#{cmd} 2>&1", 1)
       assert_match "Could not connect to bitcoind using bitcoin-cli. Is bitcoind running?", lightningd_output
