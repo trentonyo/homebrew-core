@@ -50,6 +50,7 @@ class Dwarfs < Formula
   end
 
   on_linux do
+    depends_on "gcc"
     depends_on "jemalloc"
   end
 
