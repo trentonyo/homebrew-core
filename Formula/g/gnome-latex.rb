@@ -2,7 +2,7 @@ class GnomeLatex < Formula
   desc "LaTeX editor for the GNOME desktop"
   homepage "https://gitlab.gnome.org/swilmet/gedit-tex"
   license "GPL-3.0-or-later"
-  revision 2
+  revision 3
 
   stable do
     # TODO: Rename to `gedit-tex` on the next release
