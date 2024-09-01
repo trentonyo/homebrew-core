@@ -423,7 +423,7 @@ class Aider < Formula
   end
 
   test do
-    mkdir "tmptestdir" do 
+    mkdir "tmptestdir" do
       assert_match version.to_s, shell_output("#{bin}/aider --version")
       assert_match "Missing these environment variables", shell_output("#{bin}/aider --yes --exit")
       ENV["OPENAI_API_KEY"] = "invalid"
