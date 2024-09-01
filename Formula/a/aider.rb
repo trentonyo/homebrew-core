@@ -423,9 +423,11 @@ class Aider < Formula
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/aider --version")
-    assert_match "Missing these environment variables", shell_output("#{bin}/aider --yes --exit")
-    ENV["OPENAI_API_KEY"] = "invalid"
-    assert_match "Incorrect API key", shell_output("#{bin}/aider --yes --exit --message=test 2>&1")
+    mkdir "tmptestdir" do 
+      assert_match version.to_s, shell_output("#{bin}/aider --version")
+      assert_match "Missing these environment variables", shell_output("#{bin}/aider --yes --exit")
+      ENV["OPENAI_API_KEY"] = "invalid"
+      assert_match "Incorrect API key", shell_output("#{bin}/aider --yes --exit --message=test 2>&1")
+    end
   end
 end
