@@ -1,8 +1,8 @@
 class Box2d < Formula
   desc "2D physics engine for games"
   homepage "https://box2d.org"
-  url "https://github.com/erincatto/box2d/archive/refs/tags/v2.4.2.tar.gz"
-  sha256 "85b9b104d256c985e6e244b4227d447897fac429071cc114e5cc819dae848852"
+  url "https://github.com/erincatto/box2d/archive/refs/tags/v3.0.0.tar.gz"
+  sha256 "64ad759006cd2377c99367f51fb36942b57f0e9ad690ed41548dd620e6f6c8b1"
   license "MIT"
   head "https://github.com/erincatto/Box2D.git", branch: "main"
 
@@ -18,6 +18,8 @@ class Box2d < Formula
 
   depends_on "cmake" => :build
   depends_on "doctest" => :test
+  
+  depends_on "enkits"
 
   def install
     args = %w[
